@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+* {
+    scrollbar-width: none;
+}
+
+html {
+    -ms-overflow-style: none;
+}
+
+.illustration-btn-img {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+@media (max-width: 629px) {
+    .illustration-btn-img {
+        width: 1rem;
+        height: 1rem;
+    }
+}
