@@ -19,18 +19,43 @@ export default function SingleCategory({categoryID}) {
     const [adminPopup, setAdminPopup] = useState(null)
 
     const sequentiallyLoadIllustrations = async () => {
-        if (loadingLocal) return
-        if (!(catIntData[categoryID] && catIntData[categoryID].sorted_ids)) return
-        loadingLocal = true
-        setLoadedIllustrations([])
-        for (const illustrationID of catIntData[categoryID].sorted_ids) {
-            if (stopLoadingLocal) return
-            const illustrationData = catIntData[categoryID].individual[illustrationID];
-            setLoadedIllustrations(prev => [...prev, illustrationData]);
-            await prepareImage(`${categoryID}/${illustrationID}/${illustrationData["thumbnail"]}`)
-        }
-        loadingLocal = false
-    }
+        const concurrency = 3
+        if (loadingLocal) return;
+        if (!(catIntData[categoryID] && catIntData[categoryID].sorted_ids)) return;
+
+        loadingLocal = true;
+        setLoadedIllustrations([]);
+
+        const queue = [...catIntData[categoryID].sorted_ids];
+        let active = 0;
+        let index = 0;
+
+        return new Promise((resolve) => {
+            const next = () => {
+                if (stopLoadingLocal || index >= queue.length) {
+                    if (active === 0) {
+                        loadingLocal = false;
+                        resolve();
+                    }
+                    return;
+                }
+                active++;
+                if (active < concurrency) {
+                    next();
+                }
+                const illustrationID = queue[index++];
+                const illustrationData = catIntData[categoryID].individual[illustrationID];
+                setLoadedIllustrations(prev => [...prev, illustrationData]);
+                prepareImage(`${categoryID}/${illustrationID}/${illustrationData["thumbnail"]}`)
+                    .then(() => {
+                        active--;
+                        next();
+                    });
+            };
+            next();
+        });
+    };
+
 
 
     useEffect(() => {

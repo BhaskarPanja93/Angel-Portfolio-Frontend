@@ -18,17 +18,42 @@ export default function AllCategories() {
     const [adminPopup, setAdminPopup] = useState(null)
 
     const sequentiallyLoadCategories = async () => {
-        if (loadingLocal) return
-        loadingLocal = true
-        setLoadedCategories([])
-        for (const categoryID of catExtData.sorted_ids) {
-            if (stopLoadingLocal) return
-            const categoryData = catExtData.individual[categoryID]
-            setLoadedCategories(prev => [...prev, categoryData])
-            await prepareImage(`${categoryID}/${categoryData["thumbnail"]}`)
-        }
-        loadingLocal = false
-    }
+        const concurrency = 3
+        if (loadingLocal) return;
+        loadingLocal = true;
+        setLoadedCategories([]);
+
+        const queue = [...catExtData.sorted_ids];
+        let active = 0;
+        let index = 0;
+
+        return new Promise((resolve) => {
+            const next = () => {
+                if (stopLoadingLocal || index >= queue.length) {
+                    if (active === 0) {
+                        loadingLocal = false;
+                        resolve();
+                    }
+                    return;
+                }
+                active++;
+                if (active < concurrency) {
+                    next();
+                }
+                const categoryID = queue[index++];
+                const categoryData = catExtData.individual[categoryID];
+                setLoadedCategories(prev => [...prev, categoryData]);
+                prepareImage(`${categoryID}/${categoryData["thumbnail"]}`)
+                    .then(() => {
+                        active--;
+                        next();
+                    });
+
+            };
+            next();
+        });
+    };
+
 
 
     useEffect(() => {

@@ -19,7 +19,7 @@ const AdminLogin = lazy(() => import("./elements/Content/Admin/Login"));
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(<BrowserRouter basename='/portfolio'>
-    <Suspense fallback={<>Loading AngelRiya's Portfolio...</>}>
+    <Suspense fallback={null}>
         <DefaultNotificationServiceProvider>
             <AuthServiceProvider>
                 <DataProvider>
