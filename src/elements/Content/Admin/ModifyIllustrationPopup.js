@@ -9,10 +9,15 @@ import LeftTriangle from "../../../static/left_triangle.png";
 import RightTriangle from "../../../static/right_triangle.png";
 import {UseDefaultNotification} from "../../../context/DefaultNotificationService";
 import {UseAuthContext} from "../../../context/AuthService";
+import PrevTriangle from "../../../static/left_triangle.png";
+import NextTriangle from "../../../static/right_triangle.png";
 
 export default function ModifyIllustrationPopup({categoryID, illustrationID}) {
     const [disabledOperation, setDisabledOperation] = useState(false);
     const [loaded, setLoaded] = useState(false);
+
+    const [imageIndex, setImageIndex] = useState(0)
+    const [showingGIF, setShowingGIF] = useState(false)
 
     const [progress, setProgress] = useState(0);
 
@@ -181,6 +186,33 @@ export default function ModifyIllustrationPopup({categoryID, illustrationID}) {
                 </button>
 
                 <h2 className="text-xl font-semibold text-center">Modify Illustration</h2>
+                <img
+                    src={showingGIF ? `/portfolio/dynamic/${categoryID}/${illustrationID}/${illusIntData[categoryID][illustrationID]["gif"]}` : `/portfolio/dynamic/${categoryID}/${illustrationID}/${illusIntData[categoryID][illustrationID]["images"][imageIndex]}`}
+                    className="w-full object-contain rounded-lg mb-3"
+                    style={{maxHeight: "500px"}}
+                    alt={illusIntData[categoryID][illustrationID]["name"]}/>
+                {illusIntData[categoryID][illustrationID]["gif"] ? <button
+                    className="absolute top-24 right-10 text-white font-bold text-xl border-4 border-white rounded-lg px-2 py-2 shadow-inner transform"
+                    onClick={() => setShowingGIF(!showingGIF)}
+                >
+                    {showingGIF ? "2D" : "3D"}
+                </button> : null}
+                <button
+                    className="border border-4 border-gray-500 absolute left-2 top-1/2 -translate-y-1/2 bg-white text-gray-700 rounded-full p-2 shadow-lg"
+                    onClick={() => setImageIndex(imageIndex - 1)}
+                    hidden={showingGIF || imageIndex <= 0}
+                >
+                    <img src={PrevTriangle} alt="Previous" className="w-4 h-4 opacity-70"/>
+                </button>
+
+                <button
+                    className="border border-4 border-gray-500 absolute right-2 top-1/2 -translate-y-1/2 bg-white text-gray-700 rounded-full p-2 shadow-lg"
+                    onClick={() => setImageIndex(imageIndex + 1)}
+                    hidden={showingGIF || illusIntData[categoryID][illustrationID]["images"].length <= imageIndex + 1}
+                >
+                    <img src={NextTriangle} alt="Next" className="w-4 h-4 opacity-70"/>
+                </button>
+
                 <select
                     className="block w-full px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     onChange={(e) => setKey(e.target.value)}
