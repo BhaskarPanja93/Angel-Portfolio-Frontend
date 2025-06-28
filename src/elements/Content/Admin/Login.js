@@ -39,14 +39,14 @@ export default function AdminLogin() {
 
     const handleLogout = async () => {
         try {
-            await connection.post(ROUTES.SIGN_OUT);
+            await connection.get(ROUTES.SIGN_OUT);
             logout()
             navigate(`/gallery`, {replace: true})
         } catch (error) {
             newNotification('Sign out error:', error);
         } finally {
         }
-    };
+    }
 
     return (<div className="flex items-center justify-center min-h-screen bg-gray-100">
             <div className="bg-white p-6 rounded-2xl shadow-md w-full max-w-sm">

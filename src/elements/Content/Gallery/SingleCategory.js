@@ -39,13 +39,14 @@ export default function SingleCategory({categoryID}) {
                     }
                     return;
                 }
-                active++;
-                if (active < concurrency) {
-                    next();
+                if (active >= concurrency) {
+                    return;
                 }
+                active++;
                 const illustrationID = queue[index++];
-                const illustrationData = catIntData[categoryID].individual[illustrationID];
+                const illustrationData = catIntData[categoryID].individual[illustrationID]
                 setLoadedIllustrations(prev => [...prev, illustrationData]);
+                next()
                 prepareImage(`${categoryID}/${illustrationID}/${illustrationData["thumbnail"]}`)
                     .then(() => {
                         active--;

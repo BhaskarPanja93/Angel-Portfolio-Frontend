@@ -22,7 +22,8 @@ export default function AuthServiceProvider({children}) {
 
     const refreshProfileData = async () => {
         try {
-            const response = await connection.post(ROUTES.AUTHORITY_CHECK)
+            if (!accessToken) return
+            const response = await connection.get(ROUTES.AUTHORITY_CHECK)
             setProfile(response.data["reply"])
         } catch (error) {
             newNotification("Unable to fetch profile. Please refresh tab");
@@ -34,8 +35,10 @@ export default function AuthServiceProvider({children}) {
     const sendPingAndWait = (host) => { // Create and return a new promise that resolves when server ping succeeds or fails resolving to a boolean.
         if (sendPingPromise[host] != null) return sendPingPromise[host];
         sendPingPromise[host] = new Promise((resolve) => {
-            connection.post("https://" + host + RESPONSIVE_CHECK_ROUTE, {}, {
-                responsiveCheck: true
+            connection.get("https://" + host + RESPONSIVE_CHECK_ROUTE, {
+                params: {
+                    responsiveCheck: true
+                }
             }).then(() => {
                 resolve(true)
             }).catch(() => {
@@ -51,10 +54,16 @@ export default function AuthServiceProvider({children}) {
     let sendTokenRefreshPromise = null;
     const refreshTokenAndWait = (skipLogin) => { // Create and return a new promise that resolves when the token is refreshed or fails resolving to a boolean.
         if (sendTokenRefreshPromise) return sendTokenRefreshPromise
+        const currentCSRF = Cookies.get("angel:portfolio:csrf")
+        if (!currentCSRF) return Promise.resolve(false)
         sendTokenRefreshPromise = new Promise((resolve) => {
-            connection.post(ROUTES.REFRESH, {}, {
-                refreshToken: true, skipLogin: skipLogin, headers: {
-                    'csrf': Cookies.get("angel:portfolio:csrf"),
+            connection.get(ROUTES.REFRESH, {
+                params: {
+                    refreshToken: true,
+                    skipLogin: skipLogin
+                },
+                headers: {
+                    'csrf': currentCSRF
                 }
             }).then(() => {
                 resolve(true)

@@ -36,13 +36,14 @@ export default function AllCategories() {
                     }
                     return;
                 }
-                active++;
-                if (active < concurrency) {
-                    next();
+                if (active >= concurrency) {
+                    return;
                 }
+                active++;
                 const categoryID = queue[index++];
                 const categoryData = catExtData.individual[categoryID];
                 setLoadedCategories(prev => [...prev, categoryData]);
+                next()
                 prepareImage(`${categoryID}/${categoryData["thumbnail"]}`)
                     .then(() => {
                         active--;
